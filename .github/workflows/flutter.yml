@@ -29,3 +29,135 @@ jobs:
         with:
           name: app-release.apk
           path: build/app/outputs/flutter-apk/app-release.apk
+// Flutter main.dart برای بازی کوییز رویال ساده و رنگی
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const QuizRoyalApp());
+}
+
+class QuizRoyalApp extends StatelessWidget {
+  const QuizRoyalApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Quiz Royal',
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      home: const QuizHome(),
+    );
+  }
+}
+
+class QuizHome extends StatefulWidget {
+  const QuizHome({super.key});
+
+  @override
+  State<QuizHome> createState() => _QuizHomeState();
+}
+
+class _QuizHomeState extends State<QuizHome> {
+  int score = 0;
+  int questionIndex = 0;
+
+  final List<Map<String, Object>> questions = [
+    {
+      'question': 'پایتخت ایران کدام است؟',
+      'answers': [
+        {'text': 'تهران', 'correct': true},
+        {'text': 'اصفهان', 'correct': false},
+        {'text': 'شیراز', 'correct': false},
+        {'text': 'تبریز', 'correct': false},
+      ],
+    },
+    {
+      'question': 'عدد ۵+۳ چند است؟',
+      'answers': [
+        {'text': '۸', 'correct': true},
+        {'text': '۷', 'correct': false},
+        {'text': '۹', 'correct': false},
+        {'text': '۶', 'correct': false},
+      ],
+    },
+    {
+      'question': 'سیارهٔ نزدیک به خورشید؟',
+      'answers': [
+        {'text': 'عطارد', 'correct': true},
+        {'text': 'زهره', 'correct': false},
+        {'text': 'مریخ', 'correct': false},
+        {'text': 'زمین', 'correct': false},
+      ],
+    },
+  ];
+
+  void answer(bool correct) {
+    if (correct) score++;
+    if (questionIndex + 1 < questions.length) {
+      setState(() {
+        questionIndex++;
+      });
+    } else {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('پایان بازی!'),
+          content: Text('امتیاز شما: \$score'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  score = 0;
+                  questionIndex = 0;
+                });
+              },
+              child: const Text('شروع دوباره'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentQ = questions[questionIndex];
+    final answers = currentQ['answers'] as List<Map<String, Object>>;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Quiz Royal')),
+      body: Container(
+        padding: const EdgeInsets.all(20),
+        color: Colors.deepPurple[50],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              currentQ['question'] as String,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            ...answers.map((ans) {
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(vertical: 5),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onPressed: () => answer(ans['correct'] as bool),
+                  child: Text(ans['text'] as String, style: const TextStyle(fontSize: 20)),
+                ),
+              );
+            }).toList(),
+            const SizedBox(height: 30),
+            Text('امتیاز: \$score', style: const TextStyle(fontSize: 20)),
+          ],
+        ),
+      ),
+    );
+  }
+}
